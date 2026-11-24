@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Home with Love · Dashboard de contactos</title>
+<style>
+.viz-root{color-scheme:light;--bg:#f4f3f0;--surface-1:#fcfcfb;--border:#e3e2de;--grid:#ecebe7;--text-primary:#0b0b0b;--text-secondary:#52514e;--text-muted:#7a7974;--series-1:#2a78d6;--series-hover:#1c5cab;
+--s0:#f1f0ec;--s1:#cde2fb;--s2:#9ec5f4;--s3:#6da7ec;--s4:#3987e5;--s5:#256abf;--s6:#184f95;--s7:#0d366b;--warn:#b26b00;--hi-text:#fff}
+@media (prefers-color-scheme:dark){:root:where(:not([data-theme="light"])) .viz-root{color-scheme:dark;--bg:#111110;--surface-1:#1a1a19;--border:#2e2e2c;--grid:#262624;--text-primary:#f0efec;--text-secondary:#c3c2b7;--text-muted:#8f8e86;--series-1:#3987e5;--series-hover:#6da7ec;--s0:#232321;--s1:#0d366b;--s2:#104281;--s3:#184f95;--s4:#256abf;--s5:#2a78d6;--s6:#5598e7;--s7:#86b6ef;--warn:#e0a03a;--hi-text:#0b0b0b}}
+:root[data-theme="dark"] .viz-root{color-scheme:dark;--bg:#111110;--surface-1:#1a1a19;--border:#2e2e2c;--grid:#262624;--text-primary:#f0efec;--text-secondary:#c3c2b7;--text-muted:#8f8e86;--series-1:#3987e5;--series-hover:#6da7ec;--s0:#232321;--s1:#0d366b;--s2:#104281;--s3:#184f95;--s4:#256abf;--s5:#2a78d6;--s6:#5598e7;--s7:#86b6ef;--warn:#e0a03a;--hi-text:#0b0b0b}
+*{box-sizing:border-box}body{margin:0}
+.viz-root{background:var(--bg);color:var(--text-primary);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;min-height:100vh;padding:28px clamp(16px,4vw,48px)}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+h1{font-size:24px;margin:0 0 4px}header p{margin:0;color:var(--text-secondary)}
+button{font:inherit;background:var(--surface-1);color:var(--text-primary);border:1px solid var(--border);border-radius:8px;padding:6px 12px;cursor:pointer}
+button:hover{border-color:var(--text-muted)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px}
+.kpi,.card{background:var(--surface-1);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.kpi .v{font-size:30px;font-weight:650;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.kpi .l{color:var(--text-secondary);font-size:13px}.kpi .s{color:var(--text-muted);font-size:12px;margin-top:2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:16px}
+.card h2{font-size:15px;margin:0 0 2px}.card .sub{color:var(--text-secondary);font-size:13px;margin:0 0 12px}
+.card .head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.card .head button{font-size:12px;padding:3px 9px;white-space:nowrap}
+.wide{grid-column:1/-1}
+svg{display:block;width:100%;height:auto;overflow:visible}
+svg text{fill:var(--text-secondary);font-size:12px;font-variant-numeric:tabular-nums}
+svg .val{fill:var(--text-primary);font-weight:600}
+.bar{fill:var(--series-1)}.bar.hl{fill:var(--series-hover)}
+.hit{fill:transparent;cursor:default}
+.gridline{stroke:var(--grid);stroke-width:1}.axis{stroke:var(--border)}
+#tip{position:fixed;pointer-events:none;background:var(--surface-1);color:var(--text-primary);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:12px;box-shadow:0 4px 14px rgba(0,0,0,.15);opacity:0;transition:opacity .08s;z-index:9;white-space:nowrap}
+#tip b{font-variant-numeric:tabular-nums}
+table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{padding:6px 8px;border-bottom:1px solid var(--border);text-align:left}th{color:var(--text-secondary);font-weight:600}td.n,th.n{text-align:right}
+.tbl{display:none}.show-table .tbl{display:block}.show-table .chart{display:none}
+.insights{margin:0;padding-left:18px}.insights li{margin:6px 0}
+.legend{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-secondary);margin-top:8px}
+.legend span.sw{width:18px;height:10px;border-radius:2px;display:inline-block}
+.flag{color:var(--warn);font-weight:600}
+footer{color:var(--text-muted);font-size:12px;margin-top:20px}
+</style>
+</head>
+<body>
+<div class="viz-root">
+<header>
+ <div><h1>Home with Love · Base de contactos</h1>
+ <p>Análisis de <span id="hTotal"></span> registros por campaña, provincia y lugar, más la calidad de los datos</p></div>
+ <button id="theme" aria-label="Cambiar tema">◐ Tema</button>
+</header>
+
+<section class="kpis" id="kpis"></section>
+
+<div class="grid">
+ <div class="card wide"><h2>Hallazgos principales</h2><ul class="insights" id="insights"></ul></div>
+
+ <div class="card" data-chart="prov"><div class="head"><div><h2>Contactos por provincia</h2><p class="sub">Los lugares se agruparon en las 7 provincias</p></div><button class="tg">Ver tabla</button></div><div class="chart"></div><div class="tbl"></div></div>
+
+ <div class="card" data-chart="camp"><div class="head"><div><h2>Contactos por campaña</h2><p class="sub">Según el bloque del reporte original, en orden cronológico</p></div><button class="tg">Ver tabla</button></div><div class="chart"></div><div class="tbl"></div></div>
+
+ <div class="card wide" data-chart="heat"><div class="head"><div><h2>Alcance de cada campaña por provincia</h2><p class="sub">% de los contactos de cada campaña que viven en cada provincia (cada columna suma ≈100%)</p></div><button class="tg">Ver tabla</button></div><div class="chart"></div><div class="tbl"></div></div>
+
+ <div class="card" data-chart="top"><div class="head"><div><h2>Top 15 lugares</h2><p class="sub">Como se escribieron en el reporte, con errores de dedo corregidos</p></div><button class="tg">Ver tabla</button></div><div class="chart"></div><div class="tbl"></div></div>
+
+ <div class="card" data-chart="pref"><div class="head"><div><h2>Teléfonos según primer dígito</h2><p class="sub">Solo teléfonos válidos (8 dígitos que empiezan con 6, 7 u 8)</p></div><button class="tg">Ver tabla</button></div><div class="chart"></div><div class="tbl"></div>
+ <h2 style="margin-top:22px">Calidad de los datos</h2><p class="sub">Registros que hay que revisar</p><table id="quality"></table></div>
+</div>
+<footer>Fuente: Reporte_Home_with_love.xlsx (archivo limpio). Este tablero muestra solo totales: no incluye nombres ni teléfonos. Para ubicar las provincias se usó el nombre del lugar; si el nombre era ambiguo (por ejemplo, "Zona Sur" o "San Rafael"), el lugar quedó como "Ambiguo".</footer>
+<div id="tip" role="tooltip"></div>
+</div>
+
+<script>
+const D={"total": 1178, "unicos": 1150, "telValidos": 1159, "sinTel": 8, "telIrreg": 11, "sinLugar": 14, "telRep": 9, "lugaresDistintos": 131, "provincias": [["San José", 329], ["Alajuela", 214], ["Cartago", 136], ["Heredia", 101], ["Guanacaste", 108], ["Puntarenas", 103], ["Limón", 162], ["Ambiguo / sin clasificar", 11], ["Sin lugar", 14]], "topLugares": [["SAN JOSE", 107], ["ALAJUELA", 89], ["CARTAGO", 88], ["LIMON", 80], ["HEREDIA", 68], ["GUANACASTE", 62], ["PUNTARENAS", 47], ["SAN CARLOS", 32], ["DESAMPARADOS", 29], ["GUAPILES", 26], ["TURRIALBA", 25], ["CORONADO", 21], ["SIQUIRRES", 19], ["SARAPIQUI", 17], ["PEREZ ZELEDON", 16]], "campanas": [["Base inicial", 172], ["Publicidad 2", 257], ["9 junio", 113], ["Agosto", 283], ["28 setiembre", 68], ["Desde 14 oct", 285]], "provCamp": {"camps": ["Base inicial", "Publicidad 2", "9 junio", "Agosto", "28 setiembre", "Desde 14 oct"], "provs": ["San José", "Alajuela", "Cartago", "Heredia", "Guanacaste", "Puntarenas", "Limón"], "m": [[38, 63, 40, 93, 17, 78], [32, 48, 27, 38, 14, 55], [11, 31, 16, 46, 5, 27], [13, 17, 10, 41, 5, 15], [17, 26, 6, 11, 8, 40], [23, 30, 5, 12, 5, 28], [32, 34, 8, 37, 11, 40]]}, "prefijo": [["6", 398], ["7", 189], ["8", 572]], "notas": [["Cambió de número", 8], ["Contacto no está", 2], ["Perfil no coincide", 1], ["Pide cobro", 1]], "ambiguos": [["ZONA SUR", 5], ["CONCEPCION", 2], ["DOS RIOS", 2], ["LA MILPA", 1], ["SAN RAFAEL", 1]]};
+const fmt=n=>n.toLocaleString('es-CR'), pct=(a,b)=>(100*a/b).toFixed(1).replace('.',',')+'%';
+const NS='http://www.w3.org/2000/svg';
+const el=(t,a={},p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e};
+const tip=document.getElementById('tip');
+function showTip(ev,html){tip.innerHTML=html;tip.style.opacity=1;const w=tip.offsetWidth,h=tip.offsetHeight;let x=ev.clientX+14,y=ev.clientY-h-10;if(x+w>innerWidth-8)x=ev.clientX-w-14;if(y<8)y=ev.clientY+16;tip.style.left=x+'px';tip.style.top=y+'px'}
+function hideTip(){tip.style.opacity=0}
+const T=D.total;
+document.getElementById('hTotal').textContent=fmt(T);
+
+// KPIs
+const completos=T-D.sinTel-D.telIrreg-D.sinLugar;
+document.getElementById('kpis').innerHTML=[
+ [fmt(T),'Contactos en total','En 6 campañas'],
+ [fmt(D.unicos),'Teléfonos únicos',fmt(D.telRep)+' números aparecen más de una vez'],
+ [fmt(D.lugaresDistintos),'Lugares distintos','En las 7 provincias'],
+ [pct(D.telValidos,T),'Teléfonos válidos',fmt(T-D.telValidos)+' faltan o hay que corregirlos'],
+].map(([v,l,s])=>`<div class="kpi"><div class="v">${v}</div><div class="l">${l}</div><div class="s">${s}</div></div>`).join('');
+
+// Insights
+const P=Object.fromEntries(D.provincias), gam=P['San José']+P['Alajuela']+P['Cartago']+P['Heredia'];
+const C=Object.fromEntries(D.campanas), ci=n=>D.provCamp.camps.indexOf(n), pi=n=>D.provCamp.provs.indexOf(n);
+const share=(p,c)=>D.provCamp.m[pi(p)][ci(c)]/C[c];
+const pref=Object.fromEntries(D.prefijo);
+document.getElementById('insights').innerHTML=[
+ `<b>${pct(gam,T)}</b> de los contactos están en las cuatro provincias del Valle Central (San José, Alajuela, Cartago y Heredia). Solo San José tiene <b>${pct(P['San José'],T)}</b>.`,
+ `<b>Limón</b> es la 3.ª provincia, con ${fmt(P['Limón'])} contactos, por encima de Cartago (${fmt(P['Cartago'])}) y Heredia (${fmt(P['Heredia'])}). Es un mercado fuerte fuera del Valle Central.`,
+ `Las campañas con más contactos fueron <b>"Desde 14 oct"</b> (${fmt(C['Desde 14 oct'])}) y <b>"Agosto"</b> (${fmt(C['Agosto'])}). Entre las dos suman ${pct(C['Desde 14 oct']+C['Agosto'],T)} de la base.`,
+ `En la campaña de octubre aumentó la parte de clientes de la costa. Guanacaste pasó de ${pct(share('Guanacaste','Agosto')*C['Agosto'],C['Agosto'])} en agosto a ${pct(share('Guanacaste','Desde 14 oct')*C['Desde 14 oct'],C['Desde 14 oct'])} en octubre, y Puntarenas de ${pct(share('Puntarenas','Agosto')*C['Agosto'],C['Agosto'])} a ${pct(share('Puntarenas','Desde 14 oct')*C['Desde 14 oct'],C['Desde 14 oct'])}.`,
+ `Heredia tiene solo ${pct(P['Heredia'],T)} de la base, a pesar de estar en el Valle Central. Podría ser una zona para dirigir más publicidad.`,
+ `<b>${pct(D.telValidos,T)}</b> de los teléfonos son válidos. Hay <span class="flag">${fmt(T-D.telValidos)} números por corregir</span> y ${fmt(D.sinLugar)} contactos sin lugar.`
+].map(s=>`<li>${s}</li>`).join('');
+
+// Horizontal bar
+function hbar(card,data,label){
+ const box=card.querySelector('.chart'),W=560,rowH=26,L=150,R=56,top=4;
+ const max=Math.max(...data.map(d=>d[1])),H=top+data.length*rowH+4;
+ const s=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':card.querySelector('h2').textContent},box);
+ const x=v=>(W-L-R)*v/max;
+ data.forEach(([k,v],i)=>{
+  const y=top+i*rowH, bh=16, w=Math.max(x(v),2);
+  el('text',{x:L-8,y:y+bh/2+4,'text-anchor':'end'},s).textContent=k;
+  const g=el('g',{},s);
+  el('path',{class:'bar',d:`M${L},${y}h${w-4}a4,4 0 0 1 4,4v${bh-8}a4,4 0 0 1 -4,4h-${w-4}z`},g);
+  el('text',{x:L+w+6,y:y+bh/2+4,class:'val'},s).textContent=fmt(v);
+  const hit=el('rect',{class:'hit',x:0,y:y-4,width:W,height:rowH},s);
+  hit.addEventListener('mousemove',e=>{g.firstChild.classList.add('hl');showTip(e,`${k}<br><b>${fmt(v)}</b> ${label} · ${pct(v,T)}`)});
+  hit.addEventListener('mouseleave',()=>{g.firstChild.classList.remove('hl');hideTip()});
+ });
+ el('line',{class:'axis',x1:L,x2:L,y1:0,y2:H},s);
+}
+// Vertical bar
+function vbar(card,data,label){
+ const box=card.querySelector('.chart'),W=560,H=260,L=36,B=36,top=18,R=8;
+ const max=Math.ceil(Math.max(...data.map(d=>d[1]))/50)*50;
+ const s=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':card.querySelector('h2').textContent},box);
+ const y=v=>H-B-(H-B-top)*v/max, bw=(W-L-R)/data.length, w=Math.min(48,bw*.55);
+ for(let t=0;t<=max;t+=max/4){el('line',{class:'gridline',x1:L,x2:W-R,y1:y(t),y2:y(t)},s);el('text',{x:L-6,y:y(t)+4,'text-anchor':'end'},s).textContent=fmt(t)}
+ data.forEach(([k,v],i)=>{
+  const cx=L+bw*i+bw/2, x0=cx-w/2, yt=y(v), h=H-B-yt;
+  const p=el('path',{class:'bar',d:`M${x0},${H-B}v-${h-4}a4,4 0 0 1 4,-4h${w-8}a4,4 0 0 1 4,4v${h-4}z`},s);
+  el('text',{x:cx,y:yt-6,'text-anchor':'middle',class:'val'},s).textContent=fmt(v);
+  el('text',{x:cx,y:H-B+18,'text-anchor':'middle'},s).textContent=k;
+  const hit=el('rect',{class:'hit',x:L+bw*i,y:top,width:bw,height:H-B-top+24},s);
+  hit.addEventListener('mousemove',e=>{p.classList.add('hl');showTip(e,`${k}<br><b>${fmt(v)}</b> ${label} · ${pct(v,T)}`)});
+  hit.addEventListener('mouseleave',()=>{p.classList.remove('hl');hideTip()});
+ });
+ el('line',{class:'axis',x1:L,x2:W-R,y1:H-B,y2:H-B},s);
+}
+// Heatmap
+function heat(card){
+ const {camps,provs,m}=D.provCamp, box=card.querySelector('.chart');
+ const W=980,L=110,top=26,cw=(W-L)/camps.length,ch=34,H=top+provs.length*ch+2;
+ const s=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'Mapa de calor provincia por campaña'},box);
+ const steps=['--s1','--s2','--s3','--s4','--s5','--s6','--s7'];
+ const vals=provs.map((p,i)=>camps.map((c,j)=>m[i][j]/C[c])); const vmax=Math.max(...vals.flat());
+ camps.forEach((c,j)=>el('text',{x:L+cw*j+cw/2,y:16,'text-anchor':'middle'},s).textContent=c);
+ provs.forEach((p,i)=>{
+  el('text',{x:L-8,y:top+ch*i+ch/2+4,'text-anchor':'end'},s).textContent=p;
+  camps.forEach((c,j)=>{
+   const v=vals[i][j], k=Math.min(6,Math.floor(v/vmax*6.999));
+   const r=el('rect',{x:L+cw*j+1,y:top+ch*i+1,width:cw-2,height:ch-2,rx:4,style:`fill:var(${steps[k]})`},s);
+   el('text',{x:L+cw*j+cw/2,y:top+ch*i+ch/2+4,'text-anchor':'middle',style:`fill:${k>=4?'var(--hi-text)':'var(--text-primary)'};font-weight:600`},s).textContent=Math.round(v*100)+'%';
+   r.addEventListener('mousemove',e=>{r.style.stroke='var(--text-primary)';r.style.strokeWidth=1.5;showTip(e,`${p} · ${c}<br><b>${fmt(m[i][j])}</b> contactos · ${pct(m[i][j],C[c])} de la campaña`)});
+   r.addEventListener('mouseleave',()=>{r.style.stroke='';hideTip()});
+  });
+ });
+ const lg=document.createElement('div');lg.className='legend';
+ lg.innerHTML='Menos '+steps.map(s=>`<span class="sw" style="background:var(${s})"></span>`).join('')+' Más';box.appendChild(lg);
+}
+function table(card,head,rows){
+ card.querySelector('.tbl').innerHTML=`<table><tr>${head.map((h,i)=>`<th class="${i?'n':''}">${h}</th>`).join('')}</tr>${rows.map(r=>`<tr>${r.map((c,i)=>`<td class="${i?'n':''}">${typeof c==='number'?fmt(c):c}</td>`).join('')}</tr>`).join('')}</table>`;
+}
+const card=id=>document.querySelector(`[data-chart="${id}"]`);
+const provSorted=D.provincias.slice(0,7).sort((a,b)=>b[1]-a[1]).concat(D.provincias.slice(7));
+hbar(card('prov'),provSorted,'contactos');
+table(card('prov'),['Provincia','Contactos','%'],provSorted.map(([k,v])=>[k,v,pct(v,T)]));
+vbar(card('camp'),D.campanas,'contactos');
+table(card('camp'),['Campaña','Contactos','%'],D.campanas.map(([k,v])=>[k,v,pct(v,T)]));
+heat(card('heat'));
+table(card('heat'),['Provincia',...D.provCamp.camps],D.provCamp.provs.map((p,i)=>[p,...D.provCamp.m[i]]));
+const title=s=>s.toLowerCase().replace(/(^|\s)\S/g,c=>c.toUpperCase()).replace(/ De /g,' de ');
+hbar(card('top'),D.topLugares.map(([k,v])=>[title(k),v]),'contactos');
+table(card('top'),['Lugar','Contactos','%'],D.topLugares.map(([k,v])=>[title(k),v,pct(v,T)]));
+hbar(card('pref'),D.prefijo.map(([k,v])=>['Empieza con '+k,v]),'teléfonos');
+table(card('pref'),['Primer dígito','Teléfonos','%'],D.prefijo.map(([k,v])=>[k,v,pct(v,D.telValidos)]));
+document.getElementById('quality').innerHTML='<tr><th>Problema</th><th class="n">Registros</th></tr>'+[
+ ['Teléfono vacío',D.sinTel],['Teléfono incompleto o con formato raro',D.telIrreg],['Teléfono repetido (mismo número 2+ veces)',D.telRep],['Sin lugar',D.sinLugar],['Lugar ambiguo ('+D.ambiguos.map(a=>title(a[0])).join(', ')+')',D.ambiguos.reduce((a,b)=>a+b[1],0)],
+ ...D.notas.map(([k,v])=>['Nota: '+k.toLowerCase(),v])
+].map(([k,v])=>`<tr><td>${k}</td><td class="n">${fmt(v)}</td></tr>`).join('');
+
+document.querySelectorAll('.tg').forEach(b=>b.addEventListener('click',()=>{const c=b.closest('.card');c.classList.toggle('show-table');b.textContent=c.classList.contains('show-table')?'Ver gráfico':'Ver tabla'}));
+document.getElementById('theme').addEventListener('click',()=>{const r=document.documentElement,dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;r.dataset.theme=dark?'light':'dark'});
+</script>
+</body>
+</html>
